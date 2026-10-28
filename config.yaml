@@ -2,7 +2,7 @@
 # ModelUnify — configuration
 # Edit values to suit your machine. Defaults are tuned for
 # NVIDIA CUDA (6–32 GB VRAM). Windows is the native platform.
-# See AGENTS.md and docs/MODEL_ROADMAP.md for GPU/OS notes.
+# See docs/INSTALLATION.md and docs/OPERATING_GUIDE.md for platform notes.
 # =============================================================
 
 # ---- Model selection ----

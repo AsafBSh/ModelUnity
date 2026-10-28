@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 if not exist ".venv\Scripts\python.exe" (
-    echo Project Python environment missing. See docs\DEVELOPMENT.md.
+    echo Project Python environment missing. See docs\INSTALLATION.md.
     pause
     exit /b 1
 )
