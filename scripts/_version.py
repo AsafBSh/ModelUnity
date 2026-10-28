@@ -6,4 +6,4 @@ importing `web_ui` and all of its heavy transitive deps (torch,
 diffusers, gradio, every engine). Both the UI header pill and the
 Rich progress banner import from here.
 """
-MODELUNIFY_VERSION = "1.11.2"
+MODELUNIFY_VERSION = "1.11.3"

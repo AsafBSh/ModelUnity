@@ -96,3 +96,27 @@ vendor/**/mini_trainset/
 vendor/**/*.ipynb
 vendor/**/*.ico
 /_bake_prototype.py
+
+# Keep local development material out of the published application repository.
+/.cursor/
+/.github/
+/tests/
+/benchmarks/
+/AGENTS.md
+/scripts/benchmark.py
+/scripts/benchmark_suite.py
+/scripts/validate_workbench.py
+/scripts/validate_optimization.py
+/tools/check_source_tree.py
+vendor/**/test_*.py
+
+# Publish current operator/setup guides only; retain older notes locally.
+/docs/*
+!/docs/OPERATING_GUIDE.md
+!/docs/ModelUnify_Operating_Guide.docx
+!/docs/MODEL_WEIGHTS.md
+!/docs/INSTALLATION.md
+!/docs/COMFYUI.md
+!/docs/BMS_WORKFLOW.md
+!/docs/BUILD_PORTABLE.md
+!/docs/CONTRIBUTING.md

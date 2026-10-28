@@ -1,12 +1,12 @@
 # ModelUnify operating guide
 
-Version 1.11.2 · 28 October 2026
+Version 1.11.3 · 28 October 2026
 
 ## Executive summary
 
 Use ModelUnify as a saved asset workbench: prepare references, generate geometry, inspect, texture, optimize and export. Accept a named checkpoint after each satisfactory result. For tanks, aircraft and buildings, judge silhouette, openings, symmetry and measured dimensions before surface appearance.
 
-Version 1.11.2 source excludes AI weights. This workstation retains its environments and native extensions. Existing meshes still support inspection, manual masks, CPU optimization, UV rebaking and export. Generation, paint and learned preparation need restored weights. Fresh clones also need Python and native-extension setup.
+Version 1.11.3 keeps AI weights optional. Once the main environment is installed, existing meshes support inspection, manual masks, CPU optimization, UV rebaking and export. Generation, paint and learned preparation need model downloads. Fresh installations also need native extensions before painting.
 
 ## Available workflows
 
@@ -22,7 +22,7 @@ Double-click run_modelunify.bat. Wait for the startup progress and ready URL; co
 
 Read .runtime/workbench_preview/server.log if startup fails. Ports begin at 7861 with automatic alternatives. run_modelunify.bat --server runs a visible server; stop that session with Ctrl+C. Closing only the application window leaves the server and queued jobs running.
 
-Fresh clones need CPython 3.11 x64 and the environment setup in docs/DEVELOPMENT.md. Restore selected model weights separately. On a new machine, build native paint extensions with compatible MSVC/CUDA tools; Git excludes machine-specific binaries.
+Fresh clones need CPython 3.11 x64 and the environment setup in docs/INSTALLATION.md. Restore selected model weights separately. On a new machine, build native paint extensions with compatible MSVC/CUDA tools; Git excludes machine-specific binaries.
 
 ## Key findings
 
@@ -98,7 +98,7 @@ A practical acceptance test is to close and reopen the saved project, verify its
 
 ## Restore models
 
-The 28 October cleanup removed downloaded project AI weights while retaining code, environments, native modules and user assets. It also removed the named Hunyuan, DINOv2 and Marigold shared caches. Other applications using those caches must download their weights again.
+Install only the model weights required for your next operation. Keep environments, original assets and generated outputs separate from checkpoints. Removing a shared cached model can affect other applications that use it.
 
 For an installed Comfy runtime, run .venv/Scripts/python.exe -m scripts.comfyui_host download --model trellis. Alternatives are pixal, pixal-mv and all. For a fresh runtime use setup instead. Check model after installation; keep Comfy separate from the main environment.
 
@@ -114,6 +114,6 @@ Bad mask: change the provider or correct alpha manually. Lost thin parts: compar
 
 Rejected export: read the report and inspect static hierarchy, materials, UVs and budgets. BMS mismatch: verify axes, feet, BML bounds, MTI slots and DDS names externally.
 
-Sources: docs/WORKBENCH.md, ACCURACY_AUTHORING.md, COMFYUI.md, DEVELOPMENT.md and BMS_WORKFLOW.md. Controls: scripts/workbench/schema.py and comfyui_workflows.py. Repository: github.com/AsafBSh/ModelUnity.
+Sources: docs/INSTALLATION.md, MODEL_WEIGHTS.md, COMFYUI.md and BMS_WORKFLOW.md. Controls: scripts/workbench/schema.py and comfyui_workflows.py. Repository: github.com/AsafBSh/ModelUnity.
 
-Version control. Contribute through a feature branch and pull request to main. Keep weights, environments, generated meshes, private references and secrets out of Git. Repository protections and validation gates are described in docs/CONTRIBUTING.md.
+Version control. Use a feature branch and pull request to main. Keep weights, environments, generated meshes and private references out of Git. No automated status check is required; verify relevant behavior locally. See docs/CONTRIBUTING.md.

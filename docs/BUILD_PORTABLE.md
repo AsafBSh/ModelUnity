@@ -3,7 +3,7 @@
 The root sources are authoritative. Never edit generated `dist/app` copies.
 The builder uses the version in `scripts/_version.py`, Python 3.11.9 x64,
 CUDA torch 2.5.1+cu124 and the same Gradio 6.17.3 dependency constraints as
-development. It includes `scripts/`, **`tools/`** (including InstaLOD staging
+the supported source installation. It includes `scripts/`, **`tools/`** (including InstaLOD staging
 and recipes), vendored sources/licenses, assets, documentation and config.
 
 ```powershell
@@ -22,7 +22,7 @@ output directory. Do not delete old distributions before inspecting their user
 inputs/results/caches and backing them up. The optional installer preserves
 generated models, inputs, checkpoints and caches on uninstall.
 
-Default packaging is **shape-only**. Learned weights/checkpoints and native
+Default packaging is **without native paint support**. Learned weights/checkpoints and native
 artifacts are excluded from the source copy. Model downloads may still be
 required on first inference; startup/import checks do not download models.
 Paint is an explicit build choice:
@@ -83,8 +83,8 @@ Neither `-PlanOnly` nor import checks establish release portability.
 After validating a candidate, create a fresh archive without QA/user data:
 
 ```powershell
-.\packaging\archive_candidate.ps1 -BundleDirectory 'dist/ModelUnify Workbench RC1' `
-  -OutputArchive dist/ModelUnify-1.0-Workbench-RC1.7z
+.\packaging\archive_candidate.ps1 -BundleDirectory 'dist/release-candidate-001' `
+  -OutputArchive dist/ModelUnify-release-candidate-001.7z
 ```
 
 This preserves the candidate folder, refuses existing output archives, excludes
@@ -95,7 +95,7 @@ Portable `run.bat` keeps Hugging Face modules, Torch, Hunyuan, rembg, matplotlib
 Numba and temporary caches under the bundle. `run.bat --check` reports the active
 paths. `--server --port 7862` runs in the foreground for Ctrl+C shutdown. The
 default application-window server stays alive after the window closes.
-# Optional Comfy runtime delivery (2026-10-21)
+## Optional Comfy runtime delivery
 
 New builds include `Setup ComfyUI.bat`; Inno tasks offer TRELLIS.2, Pixal single,
 Pixal fixed-orbit multiview or all. Runtime source, packages and weights are
@@ -104,7 +104,7 @@ The private full-Python bootstrap supports a machine without Python/Git on PATH;
 see COMFYUI.md for preflight, signature verification and separate validation gates.
 Installer tasks require interactive setup; silent setup does not start downloads.
 
-`packaging/build_installer.ps1 -OutputName 'ModelUnify-1.0-Workbench-RC2-Setup'`
+`packaging/build_installer.ps1 -OutputName 'ModelUnify-release-candidate-001-Setup'`
 selects a fresh plain output name. Existing installers/bundles are preserved.
 Compilation still requires Inno Setup; a plan-only check is not compilation.
 

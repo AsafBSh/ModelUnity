@@ -1,19 +1,17 @@
 # Optional model weights
 
-Version 1.11.2 keeps the integrations but excludes AI checkpoints from Git. The
-2026-10-28 cleanup removed project weights, including named shared Hugging Face
-cache folders. Code, runtimes, native modules and user assets remain installed.
-Other applications sharing those cache folders must download the same weights
-again. Unrelated Faster Whisper data was retained.
+AI checkpoints are optional downloads and are excluded from Git. Model
+integrations remain part of the application. Keep shared cache locations in mind
+when moving or removing weights used by more than one program.
 
 Without weights, launch the GUI and use existing-mesh inspection, manual alpha
 correction, CPU optimization, UV rebaking of existing maps, scaling and export.
 Generation, painting, learned background removal and AI normals need restoration.
-A fresh Git clone additionally needs [DEVELOPMENT.md](DEVELOPMENT.md).
+A fresh Git clone additionally needs [INSTALLATION.md](INSTALLATION.md).
 
 Run only the downloads you need, from the root in PowerShell with the main venv
 installed. Review upstream licenses. These commands require network access and
-disk space; cleanup did not run them.
+disk space; run only the selected commands.
 
 ## TripoSG
 
@@ -25,8 +23,8 @@ About 7.40 GiB logical including its VAE and image encoder:
 
 ## Hunyuan3D 2mv
 
-The configured wrapper uses FP16 safetensors, about 4.59 GiB. The removed cache
-also had a 4.59 GiB .ckpt copy; do not download both for this configuration.
+The configured wrapper uses FP16 safetensors, about 4.59 GiB. A .ckpt copy is
+not needed for this configuration.
 
 ```powershell
 .venv/Scripts/python.exe -c "from huggingface_hub import snapshot_download; snapshot_download('tencent/Hunyuan3D-2mv', allow_patterns=['hunyuan3d-dit-v2-mv/config.yaml','hunyuan3d-dit-v2-mv/model.fp16.safetensors'])"
@@ -36,7 +34,7 @@ If config.yaml changes, use its actual model repository/subfolder/variant.
 
 ## Hunyuan Paint
 
-The old Paint folder was about 6.41 GiB logical; DINOv2 giant adds 4.23 GiB.
+The Paint download is approximately 6.41 GiB logical; DINOv2 giant adds 4.23 GiB.
 RealESRGAN adds about 64 MiB. NVIDIA CUDA and native paint extensions are separate
 requirements. Keep low-VRAM mode on for the 12 GB validation GPU.
 
@@ -47,7 +45,7 @@ Invoke-WebRequest -Uri 'https://github.com/xinntao/Real-ESRGAN/releases/download
 ```
 
 On a fresh machine build the native extensions with compatible MSVC/CUDA tools;
-Git excludes machine-specific binaries. See [DEVELOPMENT.md](DEVELOPMENT.md).
+Git excludes machine-specific binaries. See [INSTALLATION.md](INSTALLATION.md).
 
 ## Background removal
 
@@ -63,12 +61,12 @@ Download rembg U2Net without processing an image:
 .venv/Scripts/python.exe -c "from rembg import new_session; new_session('u2net', providers=['CPUExecutionProvider'])"
 ```
 
-Other GUI rembg choices have separate downloads. The main environment currently
-has CPU onnxruntime; selecting CUDA does not install a GPU ONNX provider.
+Other GUI rembg choices have separate downloads. The default main environment
+uses CPU onnxruntime; selecting CUDA does not install a GPU ONNX provider.
 
 ## TRELLIS 2 and Pixal3D
 
-For the retained isolated runtime:
+For an installed isolated runtime:
 
 ```powershell
 .venv/Scripts/python.exe -m scripts.comfyui_host download --model trellis
@@ -76,8 +74,8 @@ For the retained isolated runtime:
 ```
 
 For a fresh clone use `setup --model trellis` instead. Shared VAEs and vision
-models are downloaded once. Automatic Pixal FOV adds MoGe. Previous logical sizes
-were about 7.93 GiB for TRELLIS/common models, or 18.95 GiB for all variants/support
+models are downloaded once. Automatic Pixal FOV adds MoGe. Expected logical sizes
+are about 7.93 GiB for TRELLIS/common models, or 18.95 GiB for all variants/support
 models, plus the separate runtime and installation working space.
 
 ```powershell
@@ -94,14 +92,14 @@ uses ComfyUI native nodes and NVIDIA CUDA. See [COMFYUI.md](COMFYUI.md).
 
 ## Normal maps
 
-Low geometry normals need no weights. High Marigold previously used about 2.40 GiB:
+Low geometry normals need no weights. High Marigold uses approximately 2.40 GiB:
 
 ```powershell
 .venv/Scripts/python.exe -c "from huggingface_hub import snapshot_download; snapshot_download('prs-eth/marigold-normals-v1-1', allow_patterns=['model_index.json','scheduler/*','tokenizer/*','text_encoder/config.json','text_encoder/model.fp16.safetensors','unet/config.json','unet/diffusion_pytorch_model.fp16.safetensors','vae/config.json','vae/diffusion_pytorch_model.fp16.safetensors'])"
 ```
 
 Medium StableNormal downloads code/weights via torch.hub on first actual use;
-it was not present in the default cache. AI normal jobs can fall back to Low;
+AI normal jobs can fall back to Low;
 inspect the actual-baker report.
 
 ## Offline checks
@@ -111,11 +109,10 @@ $env:HF_HUB_OFFLINE='1'
 $env:TRANSFORMERS_OFFLINE='1'
 .venv/Scripts/python.exe -m scripts.launch_workbench --check
 .venv/Scripts/python.exe -m scripts.workbench_preview --check
-.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py'
 ```
 
 Unset those environment variables before deliberate model downloads. These checks
-verify the app and CPU tools, not inference without checkpoints. The environment
-check with `--require-paint` should report the deliberately absent RealESRGAN file
+verify startup, not inference without checkpoints. The environment
+check with `--require-paint` should report the RealESRGAN file when it is missing
 until restored. Native backends may download on first use; Comfy never installs
 models implicitly during Generate.

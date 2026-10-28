@@ -20,7 +20,7 @@ From the source project root, in PowerShell:
 
 Choose `trellis`, `pixal` or `pixal-mv` instead of `all` to install fewer weights.
 `setup --skip-models` installs only the runtime; `download --model pixal` installs
-weights later. Setup needs Git, internet access, disk space and an NVIDIA driver
+weights later. Setup needs internet access, disk space and an NVIDIA driver
 compatible with the selected CUDA wheel. It installs a separate Python environment
 and ComfyUI under `.runtime/comfyui/`, preserving ModelUnify's existing torch stack.
 The initial ComfyUI source is pinned to commit
@@ -126,50 +126,18 @@ Use `--model pixal-mv --front ... --left ... --back ... --right ... --manual-fov
 The legacy UI links users to the full workbench controls. Existing generated
 portable distributions do not automatically include this new runtime or source.
 
-## Validation
+## Installation planning and live jobs
 
-```powershell
-.venv/Scripts/python.exe -m unittest tests.test_comfyui tests.test_launcher tests.test_workbench tests.test_readiness tests.test_optimization
-node tests/workbench_comfyui_browser.cjs
-```
+`python -m scripts.comfyui_host plan --model trellis` is read-only and checks
+disk, checkpoint sizes and the NVIDIA driver family. Setup uses pinned source;
+existing nonempty/unrecognized destinations are preserved. Runtime installation
+and downloads are explicit, while normal Generate never installs packages or models.
 
-The browser test checks all four backend selections, Pixal multiview visibility,
-one viewport and no outer page scroll. The Python tests cover frozen parameters,
-saved settings, HTTP GLB round-trips, cancellation, errors and artifact validation.
-These checks do not establish model quality: separately generate representative
-tank/building/jet assets and compare silhouette, thin parts, symmetry, dimensions
-and materials against references before accepting production assets.
+`run_comfyui_setup.bat trellis` accepts trellis, pixal, pixal-mv or all. Portable
+builds include Setup ComfyUI.bat; the installer can offer model choices. Embedded
+Python can bootstrap a private PSF-signed Python without changing PATH. Allow
+multi-GB installation working space and check the successful CUDA probe.
 
-See [COMFYUI_VALIDATION.md](COMFYUI_VALIDATION.md) for measured live runs,
-browser evidence, visual-review findings and remaining quality/release checks.
-
-Native implementation references:
-[TRELLIS.2](https://docs.comfy.org/tutorials/3d/trellis2),
-[Pixal3D](https://docs.comfy.org/tutorials/3d/pixal3d),
-[ComfyUI source](https://github.com/Comfy-Org/ComfyUI),
-[Comfy-Org models](https://huggingface.co/Comfy-Org).
-# Optional installation and live progress update (2026-10-21)
-
-`python -m scripts.comfyui_host plan --model trellis` is read-only: it checks
-available disk, selected checkpoint sizes and the NVIDIA driver family. Setup
-retains a separate Python/Torch environment and uses pinned ComfyUI source ZIPs,
-so Git is unnecessary. Existing nonempty/unrecognized destinations are preserved.
-Concurrent setup attempts are locked. Setup verifies actual Torch CUDA access
-after installing the CUDA 13 wheels; the driver-family check alone is insufficient.
-See the [NVIDIA CUDA release notes](https://docs.nvidia.com/cuda/archive/13.0.3/cuda-toolkit-release-notes/index.html).
-
-Source users can run `run_comfyui_setup.bat trellis` (or pixal/pixal-mv/all).
-New portable builds include **Setup ComfyUI.bat** and optional installer choices.
-Embedded Python lacks venv: setup can explicitly download and run the official,
-Authenticode-verified PSF Python 3.11.9 installer into a private runtime directory,
-without changing PATH or the default Python launcher. Then it creates the separate
-Comfy environment. This optional action needs internet and multi-GB working space;
-weights are not bundled. Normal Generate never installs code or downloads Comfy
-checkpoints. Driver/VRAM/disk requirements are distinct from the base app.
-
-Live jobs connect `/ws` with a unique client ID before submitting a prompt.
-Only their own prompt's node/cache/sampler events affect progress. History remains
-the completion authority if events disconnect. `comfy_live.json` and the operation
-report record sampler steps, graph-node counts and sampled host Torch memory.
-The peak is sampled, not an exact allocator maximum; node fraction is not ETA.
-
+Live progress follows the submitted prompt's node/sampler events. Server history
+remains the completion authority if events disconnect. Review actual reports,
+warnings and geometry against references before accepting a result.
