@@ -1,0 +1,5 @@
+# Optional source-format helper, not the general CLI ingest path.
+fbxloader
+# diso: optional TripoSG flash decoder; needs a compatible CUDA/MSVC build.
+# StableNormal: torch.hub downloads repository code and model weights on request.
+# No bpy/deepspeed/cupy/training dependencies are needed by the supported wrapper.

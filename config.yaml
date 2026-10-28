@@ -1,0 +1,119 @@
+# =============================================================
+# ModelUnify — configuration
+# Edit values to suit your machine. Defaults are tuned for
+# NVIDIA CUDA (6–32 GB VRAM). Windows is the native platform.
+# See AGENTS.md and docs/MODEL_ROADMAP.md for GPU/OS notes.
+# =============================================================
+
+# ---- Model selection ----
+# Native backends and isolated ComfyUI hosting:
+#   triposg  — TripoSG by Tripo AI / VAST-AI: high quality, single image
+#   hunyuan  — Hunyuan3D-2mv by Tencent:     fuses 1–4 views into one mesh
+#   comfyui  — TRELLIS.2 / Pixal3D via native ComfyUI core (Windows/NVIDIA)
+# The CLI picks the right backend per command (single/batch -> triposg,
+# multiview/multiview-bms-lods -> hunyuan).
+model:
+  comfyui:
+    url: http://127.0.0.1:8188
+    server_dir: .runtime/comfyui/ComfyUI
+    python_exe: .runtime/comfyui/python/Scripts/python.exe
+    autostart: true                 # Start an installed host on Generate; never install/download implicitly
+    memory_mode: auto              # auto / lowvram / normalvram / highvram; no resolution reduction
+    unload_after_job: true         # Only our own idle server; never unload somebody else's active jobs
+    startup_timeout: 180
+    job_timeout: 7200
+    request_timeout: 30
+    poll_interval: 1
+    weights: {}                    # Optional overrides of native Comfy-Org checkpoint filenames
+  triposg:
+    weights_dir: pretrained_weights/TripoSG
+    rmbg_dir:   pretrained_weights/RMBG-1.4
+    dtype:      float16                # float16 or float32 (float16 needs ~6GB VRAM)
+    device:     cuda                   # cuda or cpu (cpu is very slow)
+  hunyuan:
+    model_repo: tencent/Hunyuan3D-2mv  # HF repo
+    subfolder:  hunyuan3d-dit-v2-mv    # use 'hunyuan3d-dit-v2-mv-fast' for distilled (faster, lower quality)
+    variant:    fp16
+    dtype:      float16
+    device:     cuda
+    low_cpu_mem_init: true             # meta initialization + checkpoint assignment; reduce Windows CPU commit
+  paint:
+    safe_cpu_checkpoint_io: true  # Windows DINO mmap workaround; same checkpoint tensors via NumPy
+    # Hunyuan3D-2.1 PBR texture painter
+    # Requires: compiled custom_rasterizer + DifferentiableRenderer extensions
+    max_num_view: 6       # virtual baking views (4=fast, 6=quality)
+    resolution:   512     # diffusion resolution per view
+    use_remesh:   true    # remesh before painting (strongly recommended)
+    # Low-VRAM mode: wraps the multiview diffusion pipeline in mmgp's
+    # LowRAM_LowVRAM profile (CPU<->VRAM weight swapping). Required for
+    # cards with <16 GB VRAM (the painter normally needs ~21 GB).
+    # Profile 4 targets >=32 GB system RAM + >=12 GB VRAM and runs
+    # ~20-30% slower than the full-VRAM path.
+    # Set true on the RTX 3500 Ada (12 GB). Requires `pip install mmgp`.
+    low_vram_mode: true
+
+# ---- Default generation params ----
+defaults:
+  seed: 42
+  num_inference_steps: 50              # 25–50 fast draft, 50–75 quality
+  guidance_scale: 7.0
+  faces: 50000                         # post-decimation target. -1 = no limit.
+                                       # BMS prefers <20k per LOD0 for buildings.
+  remove_background: true              # use RMBG/rembg before generation
+  rembg_backend: rmbg                  # 'rmbg' (Briaai, default) or 'rembg' (u2net)
+  bake_planar_texture: true            # project source image as planar texture
+
+# ---- LOD presets for Falcon BMS export ----
+# Decimated to these face counts. The Blender BMS plugin will then re-export
+# each as Model_0..Model_6.bml.
+#
+# IMPORTANT - LOD0 convention:
+# The Hunyuan-2.1 painter always remeshes to 40,000 faces internally before
+# painting, so the painted master mesh is ~40k faces. Setting LOD0 = 40000
+# means "retain full master geometry". Model_0 is reserialized; it is NOT a
+# byte-identical file copy. Lower levels must reduce faces or the set is refused. If you ever paint a mesh with
+# MORE than 40k faces (custom painter), raise this number to match so LOD0
+# stays equal to your master.
+bms_lods:
+  lod0_faces: 40000        # match painter output - no decimation, perfect alignment
+  lod1_faces: 8000
+  lod2_faces: 3000
+  lod3_faces: 1000
+  lod4_faces: 400
+  lod5_faces: 150
+  lod6_faces: 60           # impostor / silhouette
+
+# ---- Paths ----
+paths:
+  workbench_projects_dir: projects
+  workbench_runtime_dir: .runtime/workbench_preview
+  inputs_dir:   inputs
+  outputs_dir:  outputs
+  bms_export_dir: bms_export
+  instalod_dir: tools/instalod     # Pioneer Studio inbox/outbox (see tools/instalod/README.md)
+  # Blender executable, used by scripts/max_to_glb.py to ingest 3ds Max .max
+  # scenes (needs the "Autodesk MAX" extension installed in Blender) and
+  # required anyway for the .bml export step. Leave null to auto-detect from
+  # PATH, BLENDER_EXE, or the default install dir.
+  blender_exe: null                # e.g. "C:/Program Files/Blender Foundation/Blender 4.2/blender.exe"
+
+# ---- Falcon BMS integration (optional) ----
+# Set bms_install to the root of your Falcon BMS install to enable
+# the deploy helper. Leave null/empty to skip deployment.
+bms:
+  bms_install: null        # e.g. "C:/Falcon BMS 4.37" or "C:/Falcon BMS 4.38"
+  theater: KoreaKTO        # subfolder under Data/TerrData (KoreaKTO, Balkans, etc.)
+  default_parent_id: null  # if set, deploy will place under Objects/Models/<id>/
+  texture_set_id: null     # for advanced texture set wiring; usually leave null
+  # Default normal-map baker for the textured-LOD path. Overridden per-run
+  # by the GUI "Normal map" dropdown on the Multi-view tab (used by both the
+  # PBR Paint pipeline and the BMS LOD export). Normal mapping is a general
+  # 3D-painting feature - when Paint is enabled the resulting normal map is
+  # embedded into the textured GLB; when only BMS LOD export is enabled it
+  # is written alongside the LOD files.
+  #   off     - no normal map at all
+  #   low     - free, fast NumPy bake from the mesh's per-vertex normals
+  #   medium  - StableNormal AI from albedo (~3 GB VRAM, ~10-15 s)
+  #   high    - Marigold-Normal AI from albedo (~5 GB VRAM, ~30-60 s)
+  # Legacy alias: "geometry" -> "low".
+  normal_baker: low

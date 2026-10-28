@@ -1,0 +1,98 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# downloaded model weights (multi-GB)
+pretrained_weights/
+models_cache/
+
+# HuggingFace cache used by Hunyuan3D-2 (downloaded on demand)
+.cache/
+~/.cache/huggingface/
+
+# generated outputs
+outputs/
+bms_export/
+inputs/*/
+!inputs/.gitkeep
+
+# InstaLOD Pioneer staging (keep folder markers + committed profiles)
+tools/instalod/inbox/**
+!tools/instalod/inbox/.gitkeep
+tools/instalod/outbox/**
+!tools/instalod/outbox/.gitkeep
+
+# logs and tmp
+install.log
+*.log
+
+# Private runtimes/environments and generated distributions
+.runtime/
+.venv*/
+venv/
+env/
+dist/
+build/
+*.whl
+*.7z
+*.zip
+*.pyd
+*.dll
+*.lib
+*.exp
+*.obj
+*.o
+*.so
+*.pdb
+*.ilk
+*.ninja
+
+# Raw inputs, including files directly inside inputs/
+inputs/**
+!inputs/.gitkeep
+
+# Secrets and nested vendor checkpoints/native artifacts
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+**/checkpoints/
+**/ckpt/
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.bin
+!**/licenses/**
+!**/LICENSE*
+.pytest_cache/
+.ruff_cache/
+
+# IDE
+projects/
+.vscode/
+.idea/
+
+# Publish vendor source snapshots without nested histories or research media.
+vendor/**/.git/
+vendor/**/build/
+vendor/**/dist/
+vendor/**/.cache/
+vendor/**/assets/
+vendor/**/train_examples/
+vendor/**/examples/
+vendor/**/image.jpg
+vendor/**/image.png
+vendor/**/*.png
+vendor/**/*.jpg
+vendor/**/*.jpeg
+vendor/**/*.ply
+vendor/**/*.npz
+vendor/**/mini_testset/
+vendor/**/mini_trainset/
+vendor/**/*.ipynb
+vendor/**/*.ico
+/_bake_prototype.py

@@ -1,0 +1,63 @@
+# 3D AI Generator — pinned deps for Python 3.11 + CUDA 12.4
+# PyTorch / torchvision are installed separately from the CUDA wheel index.
+# Do NOT pin them here.
+
+# ---- TripoSG core (modified from vendor/TripoSG/requirements.txt) ----
+# numpy 2.2 is used by the validated Windows runtime; older upstream pins
+# describe training/demo environments, not this patched inference wrapper.
+numpy>=1.26,<2.3
+diffusers>=0.30,<0.32
+transformers>=4.44,<4.50
+huggingface_hub>=0.25
+einops>=0.7
+opencv-python>=4.9
+trimesh>=4.4
+rtree>=1.4              # bounded spatial queries for raw/working mesh accuracy checks
+omegaconf>=2.3
+scikit-image>=0.24
+peft>=0.12
+jaxtyping>=0.2.30
+typeguard>=4.3
+# diso>=0.1.4   # OPTIONAL: only for the flash decoder; needs CUDA toolkit + MSVC to build.
+pymeshlab>=2023.12
+fast-simplification==0.1.13  # geometry reduction fallback and painter remeshing
+
+# ---- Our wrappers / UX layer ----
+setuptools==81.0.0
+wheel==0.47.0
+gradio==6.17.3
+websockets>=12,<13      # prompt-scoped local ComfyUI progress; keep separate from its model runtime
+rich>=13.7
+typer>=0.12
+pyyaml>=6.0
+pillow>=10.3
+rembg>=2.0.57           # extra background-removal option (better on satellite shots)
+onnxruntime>=1.18       # backend for rembg
+xatlas>=0.0.9           # for UV unwrap when baking textures
+tqdm>=4.66
+olefile>=0.47           # reads .max OLE2 streams for scripts/max_to_glb.py pre-flight
+
+# ---- Hunyuan3D-2 (multi-view backend) ----
+accelerate>=0.30
+pygltflib>=1.16
+
+# ---- Hunyuan3D-2.1 paint low-VRAM mode (config.yaml: model.paint.low_vram_mode) ----
+# Manages CPU<->VRAM weight swapping so the 21 GB painter fits on a 12 GB
+# GPU. Optional: only required if low_vram_mode is true in config.yaml.
+# Profile 4 (LowRAM_LowVRAM) targets >=32 GB system RAM + >=12 GB VRAM.
+mmgp>=3.7.6
+
+# ---- Hunyuan3D-2.1 inference (do not install upstream training/demo pins) ----
+realesrgan==0.3.0
+basicsr==1.4.2
+timm>=1.0,<1.1
+# The paint checkpoint's inference class inherits LightningModule.
+pytorch-lightning==2.6.5
+scipy>=1.14
+psutil>=6
+configargparse>=1.7
+ninja>=1.11
+pybind11>=2.13
+# 0.2.7 requires torch>=2.6 and would silently replace our CUDA stack.
+optimum-quanto==0.2.6
+sympy==1.13.1

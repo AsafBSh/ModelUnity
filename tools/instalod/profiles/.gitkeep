@@ -1,0 +1,4 @@
+# Save InstaLOD Studio profiles here (File → Save Profile).
+# Example names after first successful BMS run:
+#   BMS_LOD_Optimize.json
+#   BMS_Remesh_Then_LOD.json

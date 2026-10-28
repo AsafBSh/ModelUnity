@@ -1,0 +1,8 @@
+{
+  "description": "Existing local user references; original files stay intact. Camera calibration and metric dimensions are not certified.",
+  "cases": [
+    {"name":"merkava_4","category":"tank","views":{"front":"inputs/ground/merkava_4_front.png","left":"inputs/ground/merkava_4_left.png","back":"inputs/ground/merkava_4_back.png","right":"inputs/ground/merkava_4_right.png"}},
+    {"name":"hangar","category":"building","views":{"front":"inputs/ground/Hangar_front.png","left":"inputs/ground/Hangar_left.png","back":"inputs/ground/Hangar_back.png","right":"inputs/ground/Hangar_right.png"}},
+    {"name":"f15","category":"jet","views":{"front":"inputs/ground/F15.png"}}
+  ]
+}
