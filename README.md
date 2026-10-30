@@ -4,7 +4,13 @@ ModelUnify combines image-to-3D generation, PBR texturing, mesh inspection,
 optimization and export in one local Mesh Workbench. Falcon BMS is the primary
 workflow; the tools also support presentation, printing and game prototyping.
 
-**Version 1.11.3** · [Release notes](CHANGELOG.md)
+**Version 1.11.4** · [Release notes](CHANGELOG.md)
+
+![ModelUnify Mesh Workbench showing a saved building, workflow menus and the texture inspector](assets/screenshots/workbench-overview.png)
+
+The actual Mesh Workbench: operation settings on the left, one 3D viewport in
+the center and inspectors on the right. Resize the side panels and scroll inside
+them for advanced controls. [Explore the illustrated guide](docs/OPERATING_GUIDE.md#screen-tour).
 
 ## Install and launch
 
@@ -63,6 +69,40 @@ different Torch/CUDA versions and must remain separate.
 - [BMS export and external finishing](docs/BMS_WORKFLOW.md)
 - [Build a portable Windows bundle](docs/BUILD_PORTABLE.md)
 - [Contribute through pull requests](docs/CONTRIBUTING.md)
+
+## Example assets
+
+These screenshots show existing saved assets displayed in ModelUnify.
+No new inference was run for the screenshots; generated meshes and original
+references are not bundled with the repository. They illustrate inspection,
+not guaranteed geometric accuracy or BMS readiness.
+
+### Textured building
+
+![Saved textured building in ModelUnify's 3D viewport](assets/screenshots/example-building.png)
+
+40,000 triangles with UVs and embedded albedo, metallic/roughness and normal maps.
+Check openings, dimensions and the less-visible sides before export.
+
+### Textured tank
+
+![Saved textured tank in ModelUnify's 3D viewport](assets/screenshots/example-tank.png)
+
+40,000 triangles with embedded PBR maps. Inspect tracks, barrel and silhouette;
+this static mesh does not provide an articulated turret or other animation.
+
+### Hangar and jet geometry
+
+![Saved Hunyuan3D-2mv hangar geometry in ModelUnify](assets/screenshots/example-hangar.png)
+
+Earlier Hunyuan3D-2mv hangar output, approximately 20,000 triangles. This saved
+shape has no UVs or texture maps. Review closed openings, disconnected parts and
+inconsistent winding before using it.
+
+![Saved TRELLIS.2 jet geometry in ModelUnify](assets/screenshots/example-jet.png)
+
+Earlier TRELLIS.2 jet output, approximately 20,000 triangles. This is a static
+shape without UVs or embedded textures; inspect wings and thin parts carefully.
 
 ## Outputs and limitations
 

@@ -1,5 +1,11 @@
 # ModelUnify releases
 
+## 1.11.4 — 2026-10-30
+
+- Illustrate the README and operating guides with real Mesh Workbench screenshots.
+- Show model-specific inputs, texture inspection, optimization and export menus.
+- Add saved building, tank, hangar and jet examples with their actual limitations.
+
 ## 1.11.3 — 2026-10-28
 
 - Keep the published repository focused on application source and current user guides.
