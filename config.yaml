@@ -52,6 +52,15 @@ model:
     # Set true on the RTX 3500 Ada (12 GB). Requires `pip install mmgp`.
     low_vram_mode: true
 
+# ---- Optional AI installation manager ----
+# Managed by the Models workspace. A saved GUI location overrides models_dir for
+# new installations; existing models retain their recorded paths. No weights are
+# downloaded by starting the application or by pressing Generate.
+model_manager:
+  models_dir: pretrained_weights/managed
+  state_dir: .runtime/model_manager
+  reserve_bytes: 536870912           # Keep 512 MiB free beyond remaining transfers
+
 # ---- Default generation params ----
 defaults:
   seed: 42

@@ -29,10 +29,12 @@ to .venv; use the chosen environment's interpreter explicitly when different.
 
 ## Install selected models
 
-Weights are optional downloads, not part of Git. Follow [MODEL_WEIGHTS.md](MODEL_WEIGHTS.md).
-For TRELLIS.2/Pixal3D use the isolated host in [COMFYUI.md](COMFYUI.md); never install
-its dependencies into the main environment. Existing meshes can be edited and
-exported without restoring AI weights.
+Launch the GUI, choose **Models**, and install the checkpoints needed for your
+workflow. The [Models workspace](MODEL_WEIGHTS.md#use-the-models-workspace) shows
+live progress, verification, dependencies and storage. Weights are not part of Git.
+For TRELLIS.2/Pixal3D use its **Install / repair ComfyUI runtime** and **Verify
+ComfyUI runtime** actions; keep that environment separate from the main one.
+Existing meshes can be edited and exported without restoring AI weights.
 
 ## Enable PBR painting
 

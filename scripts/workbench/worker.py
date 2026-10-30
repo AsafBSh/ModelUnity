@@ -5,12 +5,16 @@ import os
 import sys
 import traceback
 from threading import Event,Thread
+from contextlib import ExitStack
 ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 
 def main():
     request_path,stage,output,status_path,cancel_path,result_path=sys.argv[1:]
     frozen=json.loads(Path(request_path).read_text(encoding="utf-8"))
+    from scripts.model_manager.service import get_manager
+    from scripts.model_manager.integration import use_resources
+    resources=ExitStack()
     if frozen.get("offline"):
         os.environ["HF_HUB_OFFLINE"]="1";os.environ["TRANSFORMERS_OFFLINE"]="1"
     from scripts.workbench.projects import atomic_json,now
@@ -50,6 +54,11 @@ def main():
         print(f"[{progress:.0%}] {message}",flush=True)
     try:
         request=json.loads(Path(request_path).read_text(encoding="utf-8"))
+        if 'model_resources' not in request:
+            request.update(get_manager(ROOT,request.get('configuration')).freeze(stage,request['settings'],request.get('images',{})))
+        else:
+            request=get_manager(ROOT,request.get('configuration')).validate_frozen(request,stage)
+        resources.enter_context(use_resources(request))
         if request.get("configuration"):
             from scripts.workbench import runtime
             runtime.CFG=request["configuration"]
@@ -71,5 +80,6 @@ def main():
     finally:
         stop.set()
         sampler.join(timeout=2)
+        resources.close()
 
 if __name__=="__main__":raise SystemExit(main())

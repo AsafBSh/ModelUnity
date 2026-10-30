@@ -1,7 +1,7 @@
 """
 Shared TripoSG inference engine.
 
-Loads weights once (download from HuggingFace on first run) and exposes a
+Loads explicitly installed weights once and exposes a
 simple `generate(image)` function used by both the CLI and the Gradio UI.
 """
 from __future__ import annotations
@@ -25,8 +25,6 @@ if str(VENDOR) not in sys.path:
 VENDOR_SCRIPTS = VENDOR / "scripts"
 if str(VENDOR_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(VENDOR_SCRIPTS))
-
-from huggingface_hub import snapshot_download           # noqa: E402
 
 from triposg.pipelines.pipeline_triposg import TripoSGPipeline   # noqa: E402
 from briarmbg import BriaRMBG                                    # noqa: E402
@@ -65,12 +63,10 @@ class TripoSGEngine:
         rmbg_dir.parent.mkdir(parents=True, exist_ok=True)
 
         if not (triposg_dir / "model_index.json").exists() and not any(triposg_dir.glob("*.safetensors")):
-            print(f"[engine] downloading TripoSG weights -> {triposg_dir}")
-            snapshot_download(repo_id="VAST-AI/TripoSG", local_dir=str(triposg_dir))
+            raise RuntimeError('TripoSG weights are missing. Open Models in Mesh Workbench to install/verify them; generation does not download checkpoints.')
 
         if background and not any(rmbg_dir.glob("*.pth")) and not (rmbg_dir / "model.safetensors").exists():
-            print(f"[engine] downloading RMBG-1.4 weights -> {rmbg_dir}")
-            snapshot_download(repo_id="briaai/RMBG-1.4", local_dir=str(rmbg_dir))
+            raise RuntimeError('RMBG-1.4 weights are missing. Install them through Models before background removal.')
 
     # ---------- load ----------
     def load(self, background: bool = True) -> None:
@@ -138,11 +134,13 @@ class TripoSGEngine:
         if remove_background and rmbg_backend != "none":
             if rmbg_backend == "rembg":
                 from rembg import remove as _rembg_remove
+                from scripts.model_manager.integration import onnx_session
+                session = onnx_session('u2net',None,ROOT,None)
                 if isinstance(image, (str, Path)):
                     img_in = Image.open(image).convert("RGBA")
                 else:
                     img_in = image if image.mode == "RGBA" else image.convert("RGBA")
-                img_alpha = _rembg_remove(img_in)
+                img_alpha = _rembg_remove(img_in,session=session)
                 bg = Image.new("RGB", img_alpha.size, (255, 255, 255))
                 bg.paste(img_alpha, mask=img_alpha.getchannel("A"))
                 img_pil = bg
@@ -339,6 +337,12 @@ def load_config(path: Optional[str] = None) -> dict:
 
 def engine_from_config(cfg: dict) -> TripoSGEngine:
     m = (cfg.get("model", {}) or {}).get("triposg", {}) or {}
+    from scripts.model_manager.service import get_manager
+    manager=get_manager(ROOT,cfg)
+    m=dict(m)
+    for key,field in (('triposg','weights_dir'),('rmbg','rmbg_dir')):
+        record=manager.record(key)
+        if record and record.get('verified') and not Path(m.get(field,'')).is_absolute():m[field]=record['directory']
     return TripoSGEngine(EngineConfig(
         weights_dir=m.get("weights_dir", "pretrained_weights/TripoSG"),
         rmbg_dir=m.get("rmbg_dir", "pretrained_weights/RMBG-1.4"),

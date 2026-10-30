@@ -18,7 +18,8 @@
             models_cache\             (created on first run; HF + torch caches)
 
     Pretrained model weights are NOT bundled (license-cleanest path) and are
-    fetched lazily on first launch (~8 GB).
+    installed explicitly through Models after launch. Size depends on the
+    selected model and its shared dependencies; inference never installs them.
 
 .PARAMETER FromVenv
     Skip the from-scratch pip install. Copy the existing .venv\Lib\site-packages

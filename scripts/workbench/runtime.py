@@ -27,9 +27,13 @@ def shape_engine(single=False):
 
 def model_config(single=False):
     from scripts.comfyui_workflows import BACKENDS
+    from scripts.model_manager.service import get_manager
+    manager=get_manager(ROOT,CFG)
     if isinstance(single,str) and single in BACKENDS:
         config = CFG.get("model",{}).get("comfyui",{})
+        key='comfy-trellis' if single==BACKENDS[0] else 'comfy-pixal'
         return {"configuration":config,"model":single,"runtime":"Separate native Windows ComfyUI host",
+                "installation":manager.status(key),
                 "support":{"NVIDIA CUDA":"integration target; see Check host for actual readiness",
                            "AMD / Intel GPU":"not validated in ModelUnify"},
                 "capabilities":{"input":"one image; Pixal3D optionally 1–4 fixed-orbit directions",
@@ -37,20 +41,9 @@ def model_config(single=False):
                 "weights":"Explicitly installed Comfy-Org checkpoints; no automatic download during Generate",
                 "note":"Original research stacks are Linux-first; this adapter uses current native ComfyUI core nodes on Windows."}
     config = CFG["model"]["triposg" if single else "hunyuan"]
-    if single:
-        directory = ROOT / config["weights_dir"]
-        available = directory.exists() and any(directory.rglob("*.safetensors"))
-        weights = str(directory)
-    else:
-        from huggingface_hub import try_to_load_from_cache
-        weights = config["model_repo"]
-        config_cached = isinstance(try_to_load_from_cache(weights,config["subfolder"]+"/config.yaml"),str)
-        variant = "."+config["variant"] if config.get("variant") else ""
-        model_cached = isinstance(try_to_load_from_cache(weights,config["subfolder"]+f"/model{variant}.safetensors"),str)
-        import os
-        local = Path(os.path.expanduser(os.environ.get("HY3DGEN_MODELS","~/.cache/hy3dgen"))) / weights / config["subfolder"]
-        available = (config_cached and model_cached) or ((local/"config.yaml").is_file() and (local/f"model{variant}.safetensors").is_file())
-    return {"configuration":config,"weights":weights,"weights_detected_locally":available,
+    status=manager.status('triposg' if single else 'hunyuan')
+    weights=status['location'] or config.get('weights_dir',config.get('model_repo'))
+    return {"configuration":config,"weights":weights,"weights_detected_locally":status['downloaded'],"installation":status,
             "capabilities":{"input_views":1 if single else "1–4 named directions", "output":"static geometry; optional planar projection", "PBR":"separate Hunyuan3D-2.1 Paint stage"},
             "support":{"NVIDIA CUDA":"supported","CPU":"slow shape fallback","AMD ROCm / Intel XPU":"not integrated"},
             "requirements":"VRAM depends on extraction settings. Estimates are not measured usage; see live telemetry and job logs.",

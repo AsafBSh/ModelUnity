@@ -23,8 +23,9 @@ inputs/results/caches and backing them up. The optional installer preserves
 generated models, inputs, checkpoints and caches on uninstall.
 
 Default packaging is **without native paint support**. Learned weights/checkpoints and native
-artifacts are excluded from the source copy. Model downloads may still be
-required on first inference; startup/import checks do not download models.
+artifacts are excluded from the source copy. In v1.12, users install and verify
+models explicitly from the **Models** workspace before inference. Startup and
+inference do not install missing models.
 Paint is an explicit build choice:
 
 ```powershell
@@ -42,8 +43,9 @@ copied explicitly when paint is selected; otherwise its Python fallback is used.
 
 `-IncludePaint` also requires the external
 `vendor/Hunyuan3D-2.1/hy3dpaint/ckpt/RealESRGAN_x4plus.pth` checkpoint, which is
-copied explicitly. Other Hunyuan/DINO weights use upstream cache/download
-behavior. Review each source/weight license before redistribution; no license
+copied explicitly. This legacy packaging prerequisite is separate from the
+workbench's verified model registry; install the required Hunyuan/DINO and
+support weights through **Models** before using paint. Review each source/weight license before redistribution; no license
 is changed by packaging. `-FromVenv -IncludePaint` copies installed native
 packages and is useful for local testing, but remains a development shortcut.
 Paint requires NVIDIA CUDA; there is no CPU/AMD/Intel GPU painting fallback.
@@ -79,6 +81,10 @@ version from `scripts/_version.py` and accepts `-BundleDirectory` for a fresh
 release candidate. `-PlanOnly` prints its inputs without compiling. Direct
 ISCC calls must provide the same `MyAppVersion` definition explicitly.
 Neither `-PlanOnly` nor import checks establish release portability.
+
+The v1.12 Models workspace requires a fresh portable validation pass, including
+downloads, cancellation/resume, model-folder selection and runtime verification
+after relocation. Existing published bundles are unchanged by source updates.
 
 After validating a candidate, create a fresh archive without QA/user data:
 

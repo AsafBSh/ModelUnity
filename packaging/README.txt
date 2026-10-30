@@ -5,14 +5,20 @@
 
 WHAT THIS IS
 ------------
+This file describes a separately built portable edition. A source release ZIP
+contains no embedded runtime; follow docs/INSTALLATION.md instead.
+
 A self-contained build of Modelunify. Nothing is installed on
 your system. The whole folder is portable: copy it to another
 drive, another machine, or a USB stick and validate the included checks before relying on it.
+After moving installed weights, use Models to register and verify their new
+locations before inference. Existing model records retain their original paths.
 
 OPTIONAL TRELLIS.2 / PIXAL3D
 --------------------------
-Run "Setup ComfyUI.bat" and choose the models explicitly. Setup checks free disk
-and the NVIDIA driver before downloading a separate ComfyUI runtime and weights.
+Open Models to install/verify the ComfyUI runtime and selected models as tracked
+jobs. "Setup ComfyUI.bat" remains an advanced alternative. Setup checks free disk
+and the NVIDIA driver before downloading the separate runtime and weights.
 It may install private PSF-signed Python into app\.runtime\comfyui without
 changing PATH or your default Python. Internet, multi-GB disk space and an
 R580-or-newer driver family plus a successful CUDA probe are required for this
@@ -22,11 +28,12 @@ Normal Generate never installs this runtime. Read app\docs\COMFYUI.md.
 REQUIREMENTS
 ------------
   - Windows 10 / 11 x64
-  - NVIDIA GPU with >= 8 GB VRAM (12 GB recommended)
+  - NVIDIA CUDA GPU for supported AI workflows; memory needs vary by model
+    and settings. Existing-mesh CPU tools need no NVIDIA GPU.
   - NVIDIA driver 555.x or newer
-  - About 25 GB free disk space (5 GB for this folder, ~8 GB for
-    model weights downloaded on first run, plus working space)
-  - Internet access for uncached model weights when first requested
+  - Enough disk space for the runtime, selected models, shared dependencies
+    and working files. Review model sizes and available space in Models.
+  - Internet access when explicitly installing or updating models
   - Paint only in builds that explicitly include matching CUDA extensions
     and the external RealESRGAN checkpoint; NVIDIA CUDA required
 
@@ -40,7 +47,8 @@ HOW TO RUN
      another installation automatically gets its own available port.
   4. Use run.bat --browser for a browser tab or --legacy for the original UI.
      Closing the window leaves queued jobs/server running. Reopen to reconnect.
-  5. Use the web UI to generate 3D meshes.
+  5. Open Models. Choose storage, install the required checkpoints and verify
+     runtime prerequisites before generating meshes.
 
 The desktop launcher exits after opening the window; closing that window
 does not stop the background server. For a foreground server you can stop
@@ -48,14 +56,16 @@ with Ctrl+C, run from this folder:
   run.bat --server --port 7862
 Use foreground mode when no server is running for this installation.
 
-FIRST LAUNCH IS SLOW
+MODELS AND DOWNLOADS
 --------------------
-Uncached models download weights when first requested. Size depends on the
-selected model: TripoSG/RMBG uses about 8 GB; Hunyuan shape and PBR paint need
-additional caches. Allow additional working space for painting. Downloads live
-under app\pretrained_weights\ or models_cache\. After those models are cached,
-the operations can run offline. Back up projects, inputs, outputs, bms_export
-and caches before deleting a bundle.
+Cold library imports can make first launch slow; they do not download weights.
+Open Models to install, verify, repair, update or review removal. Follow real
+bytes, speed and ETA during transfers; Cancel and Retry / resume retain partial
+files when supported by the source. Runtime installation reports its live log.
+New weights default to app\pretrained_weights\managed; a selected storage folder
+overrides that destination for new jobs. Generation reports missing models
+without downloading them. Back up projects, inputs, outputs, bms_export and
+models before deleting a bundle. See app\docs\MODEL_WEIGHTS.md.
 
 WHERE THINGS LIVE
 -----------------
@@ -71,7 +81,9 @@ WHERE THINGS LIVE
   app\bms_export\               LODs for external Blender/BMS export
   app\projects\                 saved assets, checkpoints and job artifacts
   app\.runtime\workbench_preview\ queue, logs and private window profile
-  models_cache\                 AI weights (created on first run)
+  app\pretrained_weights\managed\ default managed weights
+  app\.runtime\model_manager\   model inventory, download jobs and logs
+  models_cache\                 legacy library caches (not managed downloads)
 
 INPUT FOLDERS (you can also drag-drop in the UI)
 ------------------------------------------------
@@ -112,8 +124,8 @@ TROUBLESHOOTING
     the embedded Python.
 
 * The web UI never opens
-    Open http://127.0.0.1:7860 manually. If that page is
-    blank, check the console for the real error.
+    Read app\.runtime\workbench_preview\server.log for its actual URL and
+    startup errors. Ports begin at 7861 and can change if already occupied.
 
 UNINSTALLING
 ------------

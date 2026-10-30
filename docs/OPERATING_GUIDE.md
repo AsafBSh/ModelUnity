@@ -1,12 +1,12 @@
 # ModelUnify operating guide
 
-Version 1.11.4 · 30 October 2026
+Version 1.12.1 · 30 October 2026
 
 ## Executive summary
 
 Use ModelUnify as a saved asset workbench: prepare references, generate geometry, inspect, texture, optimize and export. Accept a named checkpoint after each satisfactory result. For tanks, aircraft and buildings, judge silhouette, openings, symmetry and measured dimensions before surface appearance.
 
-Version 1.11.4 keeps AI weights optional. Once the main environment is installed, existing meshes support inspection, manual masks, CPU optimization, UV rebaking and export. Generation, paint and learned preparation need model downloads. Fresh installations also need native extensions before painting.
+Version 1.12.1 keeps AI weights optional and manages their installation in Models. Once the main environment is installed, existing meshes support inspection, manual masks, CPU optimization, UV rebaking and export. Generation, paint and learned preparation need verified checkpoints and runtimes.
 
 ## Available workflows
 
@@ -25,6 +25,13 @@ Read .runtime/workbench_preview/server.log if startup fails. Ports begin at 7861
 Fresh clones need CPython 3.11 x64 and the environment setup in docs/INSTALLATION.md. Restore selected model weights separately. On a new machine, build native paint extensions with compatible MSVC/CUDA tools; Git excludes machine-specific binaries.
 
 ## Key findings
+
+Open **Models** in the asset toolbar to install and manage AI components in the
+same window. The **Manage required models** button follows the selected workflow.
+The [model manager guide](MODEL_WEIGHTS.md#use-the-models-workspace) covers live
+progress, cancellation/resume, repair, runtime checks, storage and reviewed removal.
+The Word edition includes the Models manager. Workflow screenshots below retain
+their v1.11.4 labels; the Models workspace screenshot shows v1.12.0.
 
 The interface exposes model-specific inputs and settings. Keep the five stages in their working order, but skip generation and paint when an imported mesh already contains the required geometry and materials. No model-quality score or preset proves production accuracy.
 
@@ -143,13 +150,13 @@ Hunyuan3D-2.1 Paint takes a mesh plus a reference image. Its baking views are vi
 
 Background options are Keep alpha, RMBG-1.4 and rembg. Keep alpha and manual correction can work without a learned remover. rembg exposes u2net, u2netp, isnet-general-use and silueta; each may need its own download. Select an installed ONNX provider. This workstation has CPU ONNX Runtime; selecting CUDA does not install its GPU provider.
 
-Normal options are Off, Low geometry normals, Medium StableNormal and High Marigold. Low uses CPU geometry and no model download. Medium and High infer detail from an image, may download code or weights, and do not prove physically correct surface detail. Read the report for the actual baker or fallback.
+Normal options are Off, Low geometry normals, Medium StableNormal and High Marigold. Low uses CPU geometry and no model download. Install Medium/High checkpoints and StableNormal source explicitly in Models. Image-inferred detail does not prove physically correct surface detail. Read the report for the actual baker or fallback.
 
 Accuracy rule. Preserve the original and raw master. Compare at least the front and side silhouettes before accepting a generated or remeshed candidate, especially around tracks, gun barrels, wings, antennae, windows and roof edges.
 
 ## Operating implications
 
-Generation and material stages have different dependencies. Native TripoSG and Hunyuan paths may download weights on first use; ComfyUI requires explicit setup/download and its Check model action verifies the selected graph. For predictable offline work, restore weights before the session and disable network access only after readiness succeeds.
+Generation and material stages have different dependencies. Models checks files, dependencies and runtimes before GUI jobs are queued. Generation does not install missing checkpoints. ComfyUI's Check model action additionally verifies the selected running graph. For offline work, complete installation and verification before the session.
 
 For Comfy output, inspect master.glb against asset.glb. Working solid remeshing can close holes or merge thin surfaces; decimation can remove detail. Turn remeshing off and set the working budget to zero when you need the raw result. This does not repair inaccurate generation.
 

@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from .schema import Preparation
+from scripts.model_manager.integration import preparation_resources
 
 
 def composite(image, background="white"):
@@ -15,6 +16,7 @@ def composite(image, background="white"):
     return Image.alpha_composite(canvas, rgba).convert("RGB")
 
 
+@preparation_resources
 def isolate(image, options: Preparation, root: Path, config: dict):
     if image is None:
         raise ValueError("Upload a reference image first.")
@@ -34,10 +36,11 @@ def isolate(image, options: Preparation, root: Path, config: dict):
     if not (manual or meaningful_alpha and options.preserve_alpha):
         if options.provider == "rembg":
             import onnxruntime as ort
-            from rembg import new_session, remove
+            from rembg import remove
+            from scripts.model_manager.integration import onnx_session
             if options.execution not in ort.get_available_providers():
                 raise ValueError(f"{options.execution} is unavailable; select an installed ONNX provider.")
-            session = new_session(options.model, providers=[options.execution])
+            session = onnx_session(options.model,[options.execution],root,config)
             image = remove(image, session=session, alpha_matting=options.alpha_matting,
                            alpha_matting_foreground_threshold=options.foreground,
                            alpha_matting_background_threshold=options.background_threshold,
@@ -53,7 +56,8 @@ def isolate(image, options: Preparation, root: Path, config: dict):
             if vendor not in sys.path:
                 sys.path.insert(0, vendor)
             from briarmbg import BriaRMBG
-            path = root / config["model"]["triposg"]["rmbg_dir"]
+            from scripts.model_manager.integration import directory
+            path = directory('rmbg',root=root,config=config)
             device = config["model"]["triposg"].get("device", "cuda")
             model = BriaRMBG.from_pretrained(str(path)).to(device).eval()
             try:
