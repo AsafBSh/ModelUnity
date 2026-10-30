@@ -17,6 +17,8 @@ skins/materials require additional external authoring.
 
 ## Export a package
 
+![LOD export menu in Mesh Workbench](../assets/screenshots/export-lods.png)
+
 In Export, select 1 to 7 decreasing LOD budgets and planning distances. Inspect
 every actual LOD in the same viewer. Lower levels must reduce geometry; inspect
 the export report for achieved budgets, preserved maps and any UV fallback.
@@ -27,6 +29,11 @@ Download export_package.zip to preserve the relative folder structure:
 - interchange/ contains OBJ geometry, genuine Wavefront MTLs and PBR companions.
 - Reports record units, budgets and limitations; NEXT_STEPS_BMS.txt describes
   external work still required.
+
+![Optional static BMS sidecars, signed-axis mapping and authored wetness](../assets/screenshots/export-bms.png)
+
+The screenshots show configuration of a saved building, before export. Requested
+budgets are not achieved counts and enabling sidecars is not a readiness result.
 
 Enable Also author static BMS sidecars for bms_handoff/:
 

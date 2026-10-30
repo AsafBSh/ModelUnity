@@ -1,12 +1,12 @@
 # ModelUnify operating guide
 
-Version 1.11.3 · 28 October 2026
+Version 1.11.4 · 30 October 2026
 
 ## Executive summary
 
 Use ModelUnify as a saved asset workbench: prepare references, generate geometry, inspect, texture, optimize and export. Accept a named checkpoint after each satisfactory result. For tanks, aircraft and buildings, judge silhouette, openings, symmetry and measured dimensions before surface appearance.
 
-Version 1.11.3 keeps AI weights optional. Once the main environment is installed, existing meshes support inspection, manual masks, CPU optimization, UV rebaking and export. Generation, paint and learned preparation need model downloads. Fresh installations also need native extensions before painting.
+Version 1.11.4 keeps AI weights optional. Once the main environment is installed, existing meshes support inspection, manual masks, CPU optimization, UV rebaking and export. Generation, paint and learned preparation need model downloads. Fresh installations also need native extensions before painting.
 
 ## Available workflows
 
@@ -37,6 +37,97 @@ Center viewer: orbit, pan, zoom and Fit inspect one selected mesh. Switch the wo
 Right inspectors: PBR isolates channels actually present; Texture shows extracted image pixels and dimensions; Mesh shows topology and bounds; Project manages settings, versions and saves; UV shows charts and bounded diagnostics; Jobs exposes queue state, logs and artifacts; Reference compares an aligned silhouette.
 
 A displayed channel is an inspection material, not a newly generated texture map. Missing maps can be intentional constant material factors. Inspect both the Texture pixels and the shaded result. A high polygon count, large atlas or attractive lighting does not establish geometric accuracy.
+
+## Screen tour
+
+The following captures are from the running **v1.11.4** Mesh Workbench at
+1600 × 1000. Click an image to open it at full size. Settings and inspectors
+scroll independently; controls farther down a panel remain available. Examples
+are existing saved outputs opened for inspection, with no new inference or
+model downloads during this capture.
+
+### Main screen
+
+![Main workbench with one building viewport and the Texture inspector](../assets/screenshots/workbench-overview.png)
+
+Name or open an asset at the top, choose a workflow stage, then use the left
+settings panel. The central viewport remains available throughout. The Texture
+inspector on the right shows the embedded albedo pixels and their actual size.
+Use the inspector's **…** menu for tabs that do not fit across the panel.
+
+### Inputs: Hunyuan multiview
+
+![Inputs menu with Front, Left, Back and Right hangar references](../assets/screenshots/inputs-hunyuan-multiview.png)
+
+Hunyuan3D-2mv exposes four named directions and accepts any nonempty subset.
+These are the saved hangar's actual input images and earlier shape result.
+Use **Check reference inputs**, then scroll to background removal, cropping and
+mask correction. A matching set of views still does not guarantee that openings
+or thin structures will reconstruct correctly.
+
+### Generate: model-specific controls
+
+![TripoSG selected, with only one input image available](../assets/screenshots/generate-triposg.png)
+
+Selecting TripoSG changes the upload area to a single input. Left, Back and
+Right are hidden and are not fused. **Changing the selected model does not
+regenerate the preview**: the saved Hunyuan hangar remains displayed here.
+Queue Generate mesh to produce a new result with the selected backend.
+
+![Advanced TripoSG diffusion, octree, bounds and seed controls](../assets/screenshots/generate-triposg-advanced.png)
+
+Scroll within the left panel to adjust diffusion steps, guidance, octree depths,
+extraction bounds, seed and face target. Use the model information above these
+controls to check capabilities and runtime configuration.
+
+![Advanced Hunyuan3D-2mv extraction and diffusion controls](../assets/screenshots/generate-hunyuan.png)
+
+Hunyuan uses extraction **resolution**, decoder chunks and a marching-cubes
+level. Its resolution is a different parameter from TripoSG's octree depth.
+Use a fixed seed and compare the actual output before raising the settings.
+
+![Pixal3D ComfyUI controls for fixed-orbit multiview, resolution and PBR](../assets/screenshots/generate-comfyui.png)
+
+Pixal3D's multiview checkbox selects separate weights for matched fixed-orbit
+views. Resolution, working-mesh cleanup and PBR atlas controls are independent.
+These are configuration menus; selecting them does not install checkpoints or
+run the Comfy host. See [ComfyUI setup](COMFYUI.md).
+
+### Texture and PBR inspection
+
+![Texture stage beside the actual embedded albedo inspector](../assets/screenshots/texture-inspector.png)
+
+Texture configures painting of the working mesh. The right Texture inspector
+reads maps already embedded in the displayed GLB; inspecting them does not
+paint again. The building example contains a 512 × 512 albedo map. Use Inspect
+material above the viewport to isolate available channels or show a UV checker.
+
+### Optimize
+
+![Optimization target and safeguards beside a wireframe preview](../assets/screenshots/optimize.png)
+
+Set a triangle target, expand **Optimization safeguards** and inspect wireframe
+before submitting. The shown 8,000-triangle value is a requested target; the
+viewport still shows the existing 40,000-triangle building. Read the completed
+report and compare thin parts before accepting an optimized result.
+
+### Export
+
+![Export menu with LOD count, shared textures and individual triangle budgets](../assets/screenshots/export-lods.png)
+
+Choose the number of LODs and decreasing budgets, then review planning distances
+and measured scale farther down the panel. The visible values are export
+settings, not achieved counts. Inspect each resulting LOD after export.
+
+![General interchange and optional static BMS sidecar settings](../assets/screenshots/export-bms.png)
+
+Expand **General interchange / BMS handoff** to author optional static sidecars.
+Verify signed axes and physical scale before export. BML conversion, DDS
+encoding, slot reconciliation and in-game checks remain external; see the
+[BMS workflow](BMS_WORKFLOW.md). The screenshot shows configuration only.
+
+For building, tank, hangar and aircraft viewport examples, see the
+[README gallery](../README.md#example-assets).
 
 ## Model selection
 

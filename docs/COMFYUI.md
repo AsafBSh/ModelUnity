@@ -10,6 +10,19 @@ implementation. AMD / Intel GPU inference is not validated. Results are generate
 assets, not dimensionally exact reconstructions; measure tanks, aircraft and
 buildings against reference dimensions before BMS export.
 
+## Workbench controls
+
+![Pixal3D fixed-orbit multiview and ComfyUI generation settings](../assets/screenshots/generate-comfyui.png)
+
+In Generate, choose TRELLIS.2 or Pixal3D, then scroll within the left panel.
+Pixal3D exposes the separate fixed-orbit multiview option; TRELLIS.2 takes one
+image. Shape resolution, optional PBR and working-mesh cleanup have independent
+controls. The pictured hangar is a previously saved Hunyuan mesh: changing the
+backend configures the next job and leaves the existing preview intact.
+
+This capture shows the menu, not a successful host-readiness check or a new
+generation. Install the selected weights below before submitting AI work.
+
 ## Install once
 
 From the source project root, in PowerShell:
