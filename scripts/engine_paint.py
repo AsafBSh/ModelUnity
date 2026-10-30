@@ -302,7 +302,7 @@ class Hunyuan3DPainter:
         if os.path.isdir(_torch_lib) and sys.platform == "win32" and hasattr(os, "add_dll_directory"):
             self._dll_handles.append(os.add_dll_directory(_torch_lib))
         from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
-        print("[paint] Loading Hunyuan3D-2.1 paint pipeline (downloads ~3 GB on first run)...")
+        print("[paint] Loading installed Hunyuan3D-2.1 paint pipeline (offline)...")
         cfg = Hunyuan3DPaintConfig(
             max_num_view=self.cfg.max_num_view,
             resolution=self.cfg.resolution,
@@ -317,6 +317,10 @@ class Hunyuan3DPainter:
         v21_root = ROOT / "vendor" / "Hunyuan3D-2.1"
         cfg.multiview_cfg_path = str(v21_root / "hy3dpaint" / "cfgs" / "hunyuan-paint-pbr.yaml")
         cfg.realesrgan_ckpt_path = str(v21_root / "hy3dpaint" / "ckpt" / "RealESRGAN_x4plus.pth")
+        from scripts.model_manager.integration import directory
+        cfg.multiview_pretrained_path = str(directory('paint',root=ROOT))
+        cfg.dino_ckpt_path = str(directory('dinov2',root=ROOT))
+        cfg.realesrgan_ckpt_path = str(directory('realesrgan',root=ROOT)/'RealESRGAN_x4plus.pth')
 
         # Sanity-check both paths early with clear errors.
         for p, name in [(cfg.multiview_cfg_path, "multiview config"),

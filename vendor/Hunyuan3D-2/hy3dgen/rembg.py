@@ -17,8 +17,8 @@ from rembg import remove, new_session
 
 
 class BackgroundRemover():
-    def __init__(self):
-        self.session = new_session()
+    def __init__(self, session=None):
+        self.session = session if session is not None else new_session()
 
     def __call__(self, image: Image.Image):
         output = remove(image, session=self.session, bgcolor=[255, 255, 255, 0])

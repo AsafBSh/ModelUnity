@@ -58,6 +58,13 @@ def open_project(project):
 
 
 def submit(stage, project, name, source, current, settings, images, high_source=None):
+    from scripts.model_manager.service import get_manager
+    # Fail before saving/queuing when AI prerequisites are absent. CPU tools have
+    # an empty model closure and continue to work without any checkpoints.
+    try:
+        resources = get_manager(ROOT,app.CFG).freeze(stage,settings,images)
+    except (ValueError,OSError) as exc:
+        raise gr.Error(str(exc)) from None
     if stage=="Generate":
         from scripts.workbench.input_readiness import check_inputs
         readiness=check_inputs(settings,images)
@@ -69,6 +76,7 @@ def submit(stage, project, name, source, current, settings, images, high_source=
     owned = STORE.own_file(project,current,"job_inputs") if current else None
     request = {"settings":settings, "images":{k:str(STORE.resolve(project,v["original"])) for k,v in m["inputs"].items()},
                "mesh":str(STORE.resolve(project,owned)) if owned else None}
+    request.update(resources)
     if stage=='Rebake' and high_source:
         high_owned=STORE.own_file(project,high_source,'job_inputs')
         request['high_mesh']=high_owned
@@ -147,7 +155,8 @@ def bms_readiness(path,settings):
 def comfy_host(action, settings):
     from scripts.engine_comfyui import config_from_dict, ComfyEngine, start_host, stop_host
     from scripts.comfyui_workflows import ComfyRequest, BACKENDS
-    config = config_from_dict(app.CFG)
+    from scripts.model_manager.service import get_manager
+    config = config_from_dict(get_manager(ROOT,app.CFG).runtime_configuration(app.CFG))
     if action=="plan":
         from scripts.comfyui_install import plan
         selection="trellis" if settings.get("backend")==BACKENDS[0] else "pixal-mv" if settings.get("c_multiview") else "pixal"

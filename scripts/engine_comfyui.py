@@ -35,6 +35,7 @@ class ComfyConfig:
     memory_mode: str = "auto"
     unload_after_job: bool = True
     weights: dict = field(default_factory=dict)
+    extra_model_paths: str = ""
 
     def __post_init__(self):
         url = parse.urlsplit(self.url)
@@ -252,6 +253,8 @@ def start_host(config, checkpoint=lambda message,progress:None):
                 raise ComfyError("ComfyUI runtime is not installed. Run scripts/comfyui_host.py setup or configure its directory and Python in config.yaml.")
             url = parse.urlsplit(config.url)
             args = [str(python),"-u",str(script),"--listen",url.hostname,"--port",str(url.port or 80),"--disable-auto-launch"]
+            if config.extra_model_paths:
+                args.extend(['--extra-model-paths-config',str(config.path(config.extra_model_paths))])
             if config.memory_mode != "auto":
                 args.append("--"+config.memory_mode)
             options = {"creationflags":subprocess.CREATE_NO_WINDOW} if os.name=="nt" else {}
@@ -381,4 +384,7 @@ class ComfyEngine:
 
 
 def engine_from_config(config):
+    if not config.get('model',{}).get('comfyui',{}).get('extra_model_paths'):
+        from scripts.model_manager.service import get_manager
+        config=get_manager(ROOT,config).runtime_configuration(config)
     return ComfyEngine(config_from_dict(config))

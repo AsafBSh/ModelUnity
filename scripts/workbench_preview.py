@@ -14,6 +14,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0,str(_ROOT))
 from scripts.workbench import viewer as view
 from scripts.workbench import layout
+from scripts.workbench import models_ui
 from scripts.workbench.schema import VIEWS
 from scripts.workbench.schema import PARAMETERS
 from scripts.workbench.projects import atomic_json
@@ -364,11 +365,11 @@ metallic in B**. Normal baking is a separate post-paint operation below.
 
 **Requires NVIDIA CUDA**, compiled custom_rasterizer and RealESRGAN weights.
 Low-VRAM mode requests mmgp offload; the completion report states whether it
-actually ran. First use of a model can download its weights.
+actually ran. Install and verify its checkpoints in Models before painting.
 """
 NORMAL_INFO = """Off retains existing normals. Low uses the mesh-derived NumPy baker;
 Medium uses StableNormal; High uses Marigold. AI normal bakers run after paint
-has unloaded and may download model weights/code. Failures can fall back to Low;
+has unloaded. Install their weights/code through Models first. Failures can fall back to Low;
 the operation report records the actual baker when a map is produced."""
 
 COMFY_INFO = """**Native ComfyUI 3D · isolated Windows / NVIDIA CUDA runtime**
@@ -383,8 +384,8 @@ Optional PBR exports base colour, metallic and roughness with UVs. The raw
 decoded master is retained before explicitly configured working-mesh cleanup. Normals / AO are
 separate Surface Lab operations. Scale is normalized, not measured.
 
-Generation never installs packages or downloads checkpoints. Use the host
-setup CLI once; check readiness below. AMD / Intel GPU support is unvalidated.
+Generation never installs packages or downloads checkpoints. Use Models for
+runtime/checkpoint installation; check readiness below. AMD / Intel GPU support is unvalidated.
 Use an isolated foreground on transparent or black background. For ordinary
 photos, select a remover in Inputs; retaining a scene background can reconstruct
 the background instead of the intended object.
@@ -392,6 +393,8 @@ the background instead of the intended object.
 
 
 def build():
+    from scripts.model_manager.service import get_manager
+    model_manager = get_manager(app.ROOT,app.CFG)
     initial = svc.default_asset()
     summary, details, maps, _ = svc.inspect_asset(initial)
     params = {}
@@ -427,19 +430,22 @@ def build():
             with gr.Column(scale=1, min_width=120):
                 refresh_gpu = gr.Button("Refresh GPU", min_width=120)
                 gr.HTML(html_template=layout.RESET,elem_id="layout-reset-control",min_height=0)
-        with gr.Row(equal_height=False, elem_id="asset-toolbar"):
+        with gr.Row(equal_height=False, elem_id="asset-toolbar") as asset_toolbar:
             name = gr.Textbox(value="workbench_asset", label="Project / asset name", scale=2, elem_id="project-name")
             existing = gr.Dropdown(svc.assets(), value=initial, label="Project meshes on disk", scale=4)
             open_asset = gr.Button("Open asset", scale=1, min_width=100)
             new_asset = gr.Button("New asset",scale=1,min_width=85)
+            models_button = gr.Button('Models',scale=1,min_width=100,elem_id='models-button')
 
         stage = gr.Radio([("01 Inputs", "inputs"), ("02 Generate", "generate"), ("03 Texture", "texture"),
                           ("04 Optimize", "optimize"), ("05 Export", "export")], value="inputs",
                          label="Workflow", show_label=False, elem_id="workflow-nav")
 
-        with gr.Row(equal_height=False, elem_id="workspace"):
+        with gr.Row(equal_height=False, elem_id="workspace") as mesh_workspace:
             with gr.Column(scale=4, min_width=380, elem_id="controls"):
                 gr.HTML('<div class="panel-title">OPERATION SETTINGS · SCROLL FOR MORE</div>')
+                model_readiness = gr.Markdown('Model files are checked before AI operations.',elem_id='mm-inline-readiness')
+                manage_required = gr.Button('Manage required models',elem_id='mm-manage-required')
                 with gr.Group(elem_id="view-inputs") as view_inputs:
                     view_hint = gr.Markdown("**Reference views · Hunyuan3D-2mv**\n\nUpload 1–4 directions: Front, Left, Back and Right.", elem_id="view-hint")
                     with gr.Row():
@@ -459,7 +465,7 @@ def build():
                             upload = gr.File(label="Upload GLB", file_types=[".glb"], type="filepath", height=150)
                         gr.Markdown("#### Background & image preparation")
                         prep_provider = gr.Radio([("Keep input / alpha", "none"), ("rembg", "rembg"), ("BRIA RMBG-1.4", "rmbg")], value="none", label="Background-removal provider")
-                        prep_model = gr.Dropdown(["u2net", "u2netp", "isnet-general-use", "silueta"], value="u2net", label="rembg model", info="Used only by rembg. First use may download weights.")
+                        prep_model = gr.Dropdown(["u2net", "u2netp", "isnet-general-use", "silueta"], value="u2net", label="rembg model", info="Used only by rembg. Install the selected model in Models before preparation.")
                         prep_view = gr.Radio(["Front", "Left", "Back", "Right"], value="Front", label="View to inspect preparation")
                         prep_size = gr.Slider(256, 2048, value=1024, step=64, label="Square output size (px)")
                         prep_crop = gr.Textbox(label="Optional crop: left,top,right,bottom")
@@ -573,7 +579,7 @@ def build():
                                 field("c_fov", gr.Slider, 1,170,value=20,step=.1,label="Horizontal FOV (degrees)",
                                     info="Pixal3D manual single-image or shared multiview FOV. Unused by TRELLIS.2.")
                             with gr.Accordion("Local ComfyUI host", open=False):
-                                gr.Markdown("Endpoint and memory policy: `model.comfyui` in config.yaml. Setup: `python -m scripts.comfyui_host setup --model trellis`. Check first use before generating.")
+                                gr.Markdown("Install/verify this runtime and its checkpoints in Models. Endpoint and memory policy: `model.comfyui` in config.yaml. Check host readiness before generating.")
                                 with gr.Row():
                                     comfy_start = gr.Button("Start host",min_width=80)
                                     comfy_check = gr.Button("Check model",min_width=80)
@@ -581,7 +587,7 @@ def build():
                                 comfy_status = gr.JSON(label="Host / checkpoint readiness")
                                 comfy_plan = gr.Button("Check setup requirements")
                         generate = gr.Button("Generate mesh", variant="primary", size="lg")
-                        gr.Markdown("Reads images from Inputs. This starts real inference and may load/download weights.")
+                        gr.Markdown("Reads images from Inputs and starts real inference with installed models. Missing checkpoints are reported; no download starts here.")
                         with gr.Accordion("Compare generators · reproducible benchmark",open=False):
                             gr.Markdown("Creates separate saved projects and queues real shape-only inference. Same input preparation, seed 42 and working triangle target; Hunyuan uses supplied directions, single-image models use Front. Quick settings measure draft behavior, not maximum model quality. Review silhouettes, symmetry and thin parts against your references.")
                             from scripts.workbench.benchmarking import MODELS
@@ -832,8 +838,13 @@ def build():
 
         def enqueue(stage_name):
             def run(project_path,label,source_path,current_path,*values):
-                return svc.submit(stage_name,project_path,label,source_path,current_path,
-                                  collect(values[:len(flat)]),images(values[len(flat):]))
+                try:
+                    return svc.submit(stage_name,project_path,label,source_path,current_path,
+                                      collect(values[:len(flat)]),images(values[len(flat):]))
+                except gr.Error as exc:
+                    # Keep actionable prerequisites visible beside the viewport;
+                    # nonqueued HTTP errors do not reliably display a toast.
+                    return gr.skip(),gr.skip(),str(exc.message)
             return run
         for button,stage_name in ((generate,"Generate"),(paint_go,"Texture"),(optimize_go,"Optimize"),
                                   (export_go,"Export"),(surface_go,"Surface"),(scale_go,"Scale")):
@@ -1151,6 +1162,50 @@ def build():
             new = svc.queue().submit(row["project"],row["stage"],row["request"])
             return new,f"Queued reproducible rerun `{new[:10]}`."
         rerun_job.click(rerun,job_choice,[last_job,stage_status],queue=False)
+        # Keep the WebGL workspace mounted; Gradio visible=False destroys its
+        # child DOM and would dispose the scene and camera on each navigation.
+        models_view_state = gr.HTML('<span data-open="false"></span>',elem_id='models-view-state')
+        model_view = models_ui.mount(model_manager)
+        required_keys = gr.State([])
+        def selection_requirements(which,*values):
+            from scripts.model_manager.catalog import required_models
+            selected_settings=collect(values[:len(flat)])
+            action={'inputs':'Prepare','generate':'Generate','texture':'Texture','optimize':'Optimize','export':'Export'}[which]
+            return required_models(action,selected_settings,images(values[len(flat):]))
+        requirement_inputs=[stage]+settings_inputs+images_inputs
+        gr.on([component.change for component in requirement_inputs],selection_requirements,requirement_inputs,required_keys,queue=False)
+        def requirement_text(keys):
+            if not keys:return 'No AI checkpoints required for the selected operation.'
+            pending=[s['name'] for s in model_manager.readiness(keys) if not s['ready']]
+            return '**Models required:** '+', '.join(pending)+'. Open Models to install or verify.' if pending else '**Selected models ready** · files and runtime prerequisites detected.'
+        def open_models(keys=None):
+            chosen=next((k for k in (keys or []) if not model_manager.status(k)['ready']),None)
+            return gr.update(visible=True),'<span data-open="true"></span>',gr.update(visible=False),gr.update(visible=False),chosen or gr.skip()
+        navigation_outputs=[model_view['workspace'],models_view_state,asset_toolbar,stage,model_view['selected']]
+        models_button.click(lambda:open_models(),outputs=navigation_outputs,queue=False)
+        manage_required.click(open_models,required_keys,navigation_outputs,queue=False)
+        def install_workflow(keys):
+            if not keys:raise gr.Error('The selected workbench operation needs no AI checkpoints. Select a model or another workflow stage first.')
+            model_manager.start()
+            pending=[key for key in keys if not model_manager.status(key)['downloaded']]
+            import shutil
+            required=sum(item['bytes'] for item in model_manager.readiness(keys) if not item['downloaded'])
+            drive=model_manager.models_dir
+            while not drive.exists() and drive.parent!=drive:drive=drive.parent
+            if shutil.disk_usage(drive).free < required+model_manager.reserve:
+                raise gr.Error('Insufficient estimated space for the selected workflow models. Choose another model folder before installing.')
+            for key in pending:model_manager.submit(key,'install')
+            return f'Queued {len(pending)} selected workflow model(s), including missing shared checkpoints. Runtime/build prerequisites are listed separately in each model.'
+        model_view['workflow_install'].click(install_workflow,required_keys,model_view['message'],queue=False)
+        model_view['close'].click(lambda:(gr.update(visible=False),'<span data-open="false"></span>',gr.update(visible=True),gr.update(visible=True)),
+            outputs=navigation_outputs[:4],queue=False)
+        model_view['refresh'].click(lambda:model_manager._inventory_cache.clear(),queue=False)
+        def model_poll(*values):
+            *poll_values,keys=values
+            return (*model_view['poll'](*poll_values),requirement_text(keys))
+        model_outputs=model_view['poll_outputs']+[models_button,model_readiness]
+        gr.Timer(2).tick(model_poll,model_view['poll_inputs']+[required_keys],model_outputs,queue=False)
+        demo.load(selection_requirements,requirement_inputs,required_keys,queue=False)
     return demo.queue(default_concurrency_limit=1)
 
 
@@ -1175,13 +1230,18 @@ def main():
         input_background_fill_dark="#0b1b22", border_color_primary_dark="#24434b",
         button_primary_background_fill_dark="#42cdb5", button_primary_text_color_dark="#06251f")
     svc.queue()
+    from scripts.model_manager.service import get_manager
+    manager=get_manager(app.ROOT,app.CFG)
+    manager.start()
+    import atexit
+    atexit.register(manager.close)
     demo.launch(server_name="127.0.0.1", server_port=args.port, inbrowser=not args.no_open,
-                share=False, show_error=True, theme=theme, css=CSS,
+                share=False, show_error=True, theme=theme, css=CSS+models_ui.CSS,
                 favicon_path=str(app.ROOT / "assets" / "logo.png"),
                 head=instance_marker(app.ROOT)+"""<script>if(new URL(location.href).searchParams.get('__theme')!=='dark') {
                   const u=new URL(location.href);u.searchParams.set('__theme','dark');location.replace(u.href);
                 }</script>""",
-                allowed_paths=[str(app.OUT_DIR), str(app.BMS_DIR), str(svc.STATE_DIR), str(svc.STORE.root)],
+                allowed_paths=[str(app.OUT_DIR), str(app.BMS_DIR), str(svc.STATE_DIR), str(svc.STORE.root),str(manager.state/'logs')],
                 footer_links=[])
 
 

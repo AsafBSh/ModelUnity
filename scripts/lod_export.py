@@ -430,9 +430,9 @@ def make_textured_lod_set(
 #             brick / panel / rivet detail beyond what the LOD0 mesh has.
 #   "medium"  Stable-X/StableNormal (yoso turbo). AI predicts tangent-space
 #             normals from the albedo image. ~3 GB VRAM, ~10-15 s,
-#             ~2 GB model download on first run.
+#             requires an installed StableNormal model from Models.
 #   "high"    prs-eth/marigold-normals-v1-1. AI prediction, higher quality.
-#             ~5 GB VRAM, ~30-60 s, ~3 GB model download on first run.
+#             ~5 GB VRAM, ~30-60 s; install Marigold from Models first.
 #
 # Legacy alias: "geometry" -> "low" (older configs / docs may still say
 # "geometry" for the NumPy mesh baker - both names work).
@@ -451,10 +451,12 @@ def _load_marigold_pipe():
     if _MARIGOLD_PIPE is None:
         import torch
         import diffusers
+        from scripts.model_manager.integration import directory
         _MARIGOLD_PIPE = diffusers.MarigoldNormalsPipeline.from_pretrained(
-            "prs-eth/marigold-normals-v1-1",
+            str(directory('marigold')),
             variant="fp16",
             torch_dtype=torch.float16,
+            local_files_only=True,
         )
         if torch.cuda.is_available():
             _MARIGOLD_PIPE = _MARIGOLD_PIPE.to("cuda")
@@ -483,10 +485,13 @@ def _load_stablenormal_pipe():
     global _STABLENORMAL_PIPE
     if _STABLENORMAL_PIPE is None:
         import torch
-        _STABLENORMAL_PIPE = torch.hub.load(
-            "Stable-X/StableNormal", "StableNormal_turbo",
-            trust_repo=True,
-        )
+        from scripts.model_manager.integration import directory
+        code=directory('stablenormal-code')
+        weights=directory('stablenormal')
+        if not str(weights).endswith('yoso-normal-v0-3'):
+            raise RuntimeError('StableNormal requires its managed installation layout. Use Models to install it.')
+        _STABLENORMAL_PIPE = torch.hub.load(str(code), 'StableNormal_turbo',
+            source='local',trust_repo=True,yoso_version=str(weights))
     return _STABLENORMAL_PIPE
 
 
@@ -506,7 +511,7 @@ def _unload_stablenormal_pipe():
 
 def bake_normal_marigold(albedo_img, uv_size: int = 2048):
     """High-quality: Marigold-Normal v1-1 predicts surface normals from the
-    albedo texture. ~5 GB VRAM, ~30-60 s, ~3 GB model download on first run.
+    albedo texture. ~5 GB VRAM, ~30-60 s; install Marigold from Models first.
     Best perceptual surface detail (bricks, panel seams, window mullions).
     Returns a PIL.Image in 'RGB' mode at (uv_size, uv_size)."""
     from PIL import Image as _Image
@@ -524,7 +529,7 @@ def bake_normal_marigold(albedo_img, uv_size: int = 2048):
 
 def bake_normal_stablenormal(albedo_img, uv_size: int = 2048):
     """Low-cost AI: Stable-X/StableNormal (turbo). ~3 GB VRAM, ~10-15 s,
-    ~2 GB model download on first run. Faster than Marigold, slightly less
+    Install StableNormal from Models first. Faster than Marigold, slightly less
     sharp on fine detail.
     Returns a PIL.Image in 'RGB' mode at (uv_size, uv_size)."""
     from PIL import Image as _Image
@@ -571,14 +576,14 @@ def _bake_normal_map(mesh, albedo_img, baker: str = "low", uv_size: int = 2048):
     try:
         if baker == "medium":
             print(f"[lod_export] Baking normal map via Stable-X/StableNormal "
-                  f"(turbo) at {uv_size}x{uv_size}. First run downloads ~2 GB.")
+                  f"(turbo) at {uv_size}x{uv_size}, using installed weights.")
             try:
                 return _normal_result(bake_normal_stablenormal(albedo_img, uv_size=uv_size), "medium", baker)
             finally:
                 _unload_stablenormal_pipe()
         if baker == "high":
             print(f"[lod_export] Baking normal map via Marigold-Normal v1-1 "
-                  f"at {uv_size}x{uv_size}. First run downloads ~3 GB.")
+                  f"at {uv_size}x{uv_size}, using installed weights.")
             try:
                 return _normal_result(bake_normal_marigold(albedo_img, uv_size=uv_size), "high", baker)
             finally:

@@ -1,5 +1,29 @@
 # ModelUnify releases
 
+Each entry records the version, date and main user-visible changes. Historical
+entries describe their own delivery; validation of one version does not certify
+later packages or machines.
+
+## 1.12.1 — 2026-10-30
+
+- Update the README, setup guides and illustrated Word guide for the Models manager.
+- Add committed-source export packages with file hashes, a source commit manifest
+  and a SHA-256 checksum; exclude weights, runtimes and private development data.
+- Document the release procedure and require a dated change log for every update.
+- Validation: 156 CPU tests, including source-export checks, passed alongside
+  interactive model-manager checks for the
+  implementation. ComfyUI and paint runtime probes passed on the reference GPU.
+  Full AI inference and clean portable-runtime validation remain separate.
+
+## 1.12.0 — 2026-10-30
+
+- Add a Models workspace with persistent installation activity, resumable downloads,
+  integrity verification, repair, updates and reviewed removal of owned weights.
+- Manage shared model dependencies, storage locations and isolated ComfyUI runtime
+  actions from the GUI; keep credentials in session memory.
+- Check selected workflow prerequisites before queuing AI work; generation and
+  preparation no longer start hidden checkpoint downloads.
+
 ## 1.11.4 — 2026-10-30
 
 - Illustrate the README and operating guides with real Mesh Workbench screenshots.

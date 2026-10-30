@@ -98,7 +98,7 @@ class HunyuanMVEngine:
     def load(self, background: bool = True) -> None:
         if self._pipe is not None:
             if background and self._rembg is None:
-                self._rembg = BackgroundRemover()
+                self._rembg = self._background_remover()
             return
         print(f"[hunyuan] loading {self.cfg.model_repo}/{self.cfg.subfolder} ({self.cfg.dtype})")
         if self.cfg.low_cpu_mem_init:
@@ -112,7 +112,12 @@ class HunyuanMVEngine:
                 dtype=self.cfg.torch_dtype,
             )
         if background:
-            self._rembg = BackgroundRemover()
+            self._rembg = self._background_remover()
+
+    @staticmethod
+    def _background_remover():
+        from scripts.model_manager.integration import onnx_session
+        return BackgroundRemover(session=onnx_session('u2net',None,ROOT,None))
 
     def unload(self) -> None:
         """Free VRAM so a different pipeline can load. Call this between
@@ -208,6 +213,9 @@ class HunyuanMVEngine:
 
 def engine_from_config(cfg: dict) -> HunyuanMVEngine:
     h = (cfg.get("model", {}) or {}).get("hunyuan", {}) or {}
+    from scripts.model_manager.service import get_manager
+    record=get_manager(ROOT,cfg).record('hunyuan')
+    if record and record.get('verified') and not Path(h.get('model_repo','')).is_absolute():h={**h,'model_repo':record['directory']}
     return HunyuanMVEngine(HunyuanConfig(
         model_repo=h.get("model_repo", "tencent/Hunyuan3D-2mv"),
         subfolder=h.get("subfolder", "hunyuan3d-dit-v2-mv"),

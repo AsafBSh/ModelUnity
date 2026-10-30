@@ -12,6 +12,16 @@ buildings against reference dimensions before BMS export.
 
 ## Workbench controls
 
+In v1.12.0, open **Models** to install TRELLIS/Pixal checkpoints and their shared
+components, track downloads, and cancel/resume or repair them. Expand **ComfyUI
+runtime and paint extensions** to install/repair the isolated runtime and verify
+its actual Torch/CUDA stack. Start/stop/check the host from the same panel.
+The [Models guide](MODEL_WEIGHTS.md#use-the-models-workspace) is the primary setup
+flow; CLI commands below remain an advanced alternative for external caches.
+Managed model directories are registered through a separate extra-model-paths
+configuration; existing Comfy configuration is preserved. Restart an owned host
+after adding a model location. External hosts are not restarted automatically.
+
 ![Pixal3D fixed-orbit multiview and ComfyUI generation settings](../assets/screenshots/generate-comfyui.png)
 
 In Generate, choose TRELLIS.2 or Pixal3D, then scroll within the left panel.
@@ -21,7 +31,7 @@ controls. The pictured hangar is a previously saved Hunyuan mesh: changing the
 backend configures the next job and leaves the existing preview intact.
 
 This capture shows the menu, not a successful host-readiness check or a new
-generation. Install the selected weights below before submitting AI work.
+generation. Install and verify the selected weights/runtime through Models before submitting AI work.
 
 ## Install once
 

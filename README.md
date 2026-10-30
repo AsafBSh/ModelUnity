@@ -4,18 +4,24 @@ ModelUnify combines image-to-3D generation, PBR texturing, mesh inspection,
 optimization and export in one local Mesh Workbench. Falcon BMS is the primary
 workflow; the tools also support presentation, printing and game prototyping.
 
-**Version 1.11.4** · [Release notes](CHANGELOG.md)
+**Version 1.12.1** · [Change history](CHANGELOG.md) · [GitHub downloads](https://github.com/AsafBSh/ModelUnity/releases)
 
 ![ModelUnify Mesh Workbench showing a saved building, workflow menus and the texture inspector](assets/screenshots/workbench-overview.png)
 
 The actual Mesh Workbench: operation settings on the left, one 3D viewport in
 the center and inspectors on the right. Resize the side panels and scroll inside
-them for advanced controls. [Explore the illustrated guide](docs/OPERATING_GUIDE.md#screen-tour).
+them for advanced controls. This overview was captured in v1.11.4;
+[explore the illustrated guide](docs/OPERATING_GUIDE.md#screen-tour).
 
 ## Install and launch
 
-Follow [Windows installation](docs/INSTALLATION.md), download only the
-[models you need](docs/MODEL_WEIGHTS.md), then double-click `run_modelunify.bat`.
+The release **source ZIP** includes code, guides and screenshots. Extract it to a
+new folder and follow setup below. It contains no Python runtime, AI weights or
+installer; the ZIP's SHA-256 companion verifies the download.
+
+Follow [Windows installation](docs/INSTALLATION.md), then double-click
+`run_modelunify.bat`. Open **Models** to install only the
+[models you need](docs/MODEL_WEIGHTS.md) from the GUI.
 Edge or Chrome opens a dedicated application window. `--browser` uses a browser
 tab and `--server` runs a foreground server that you can stop with Ctrl+C.
 Closing only the application window leaves its server and jobs running.
@@ -38,8 +44,23 @@ UV, Project, Reference and Jobs inspectors. Save projects and accept named
 checkpoints after reviewing each operation. Preserve the original and raw master.
 
 Read the [practical operating guide](docs/OPERATING_GUIDE.md) or its
-[Word edition](docs/ModelUnify_Operating_Guide.docx) for detailed controls,
+[illustrated Word guide](docs/ModelUnify_Operating_Guide.docx) for detailed controls,
 model selection, accuracy checks and troubleshooting.
+Both guides cover the Models manager. Older workflow screenshots retain their original version labels.
+
+## Install and manage AI models
+
+![ModelUnify Models workspace with the model library, prerequisites and installation activity](assets/screenshots/models-manager.png)
+
+Choose **Models** in the asset toolbar or **Manage required models** beside the
+current operation. Install, verify, repair and update checkpoints, follow live
+transfer progress, cancel and resume downloads, and review exact owned files
+before removal. Shared checkpoints are reused. Choose a model drive, register
+existing files read-only, and manage the separate ComfyUI runtime in the same window.
+
+**Downloaded** and **ready to run** are separate states: verify runtimes and resolve
+missing prerequisites before inference. Generation never starts hidden downloads.
+See the [model manager guide](docs/MODEL_WEIGHTS.md#use-the-models-workspace).
 
 ## Available models
 

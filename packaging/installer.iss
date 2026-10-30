@@ -113,7 +113,7 @@ Filename: "{app}\Setup ComfyUI.bat"; Parameters: "pixal"; Description: "Download
 Filename: "{app}\Setup ComfyUI.bat"; Parameters: "pixal-mv"; Description: "Download and set up Pixal3D multiview"; WorkingDir: "{app}"; Tasks: comfy\pixalmv; Flags: postinstall skipifsilent shellexec
 Filename: "{app}\Setup ComfyUI.bat"; Parameters: "all"; Description: "Download and set up all Comfy 3D variants"; WorkingDir: "{app}"; Tasks: comfy\all; Flags: postinstall skipifsilent shellexec
 ; Offer to launch immediately on finish (unchecked by default - first run
-; downloads 8 GB of weights, user might want to read README first).
+; can be slow during imports; model installation is an explicit GUI action).
 Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; \
     WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent unchecked
 

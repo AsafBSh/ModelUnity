@@ -9,9 +9,75 @@ correction, CPU optimization, UV rebaking of existing maps, scaling and export.
 Generation, painting, learned background removal and AI normals need restoration.
 A fresh Git clone additionally needs [INSTALLATION.md](INSTALLATION.md).
 
-Run only the downloads you need, from the root in PowerShell with the main venv
-installed. Review upstream licenses. These commands require network access and
-disk space; run only the selected commands.
+## Use the Models workspace
+
+ModelUnify v1.12.0 manages downloads inside the GUI. After installing the main
+application environment, no terminal commands are needed for model installation.
+
+![Models library, model prerequisites and live installation activity](../assets/screenshots/models-manager.png)
+
+1. Open **Models** from the asset toolbar, or **Manage required models** in the
+   current workflow stage. Choose a model from the searchable library.
+2. Read its capabilities, linked model terms, required components and estimated
+   size. In **Storage and credentials**, choose a dedicated model folder with
+   enough room for the model, shared dependencies and installation headroom.
+3. Choose **Install / repair**, or **Install workflow models** for the current
+   stage's selected checkpoints. Shared components are reused. Pixal's MoGe
+   dependency is needed only for automatic single-view FOV; the texture VAE is
+   required only when Comfy PBR is selected.
+4. Follow **Installation activity**: resolving, downloading, verifying and
+   installing are distinct stages. Downloads show actual bytes, measured speed
+   and an estimated remaining time when available. Runtime installation shows
+   its log with indeterminate progress rather than a made-up percentage.
+5. Use **Cancel installation** and **Retry / resume** when needed. Jobs survive
+   browser reconnects; after a server restart, interrupted jobs wait for Retry.
+   Partial bytes and pinned revisions are retained. A server must stay running
+   for background work; closing only the dedicated app window leaves it running.
+6. Check **Ready** before generation. Files, dependencies and runtime verification
+   are separate checks; readiness is not a claim that inference was tested.
+
+**ComfyUI runtime and paint extensions** offers isolated Comfy installation,
+runtime verification, host start/stop/check, paint extension builds and paint
+runtime verification. These run as tracked jobs. Comfy runtime repair requires
+its host to be stopped. Native paint builds require compatible MSVC/CUDA tools
+already installed; the app does not silently install system toolchains.
+
+**Verify files** hashes the recorded installation; **Update model** resolves a new
+upstream revision explicitly. **Register an existing model folder** checks an
+external copy against source hashes and leaves it read-only. Sources without a
+published digest must use their curated download instead. Existing default Hub,
+TripoSG, rembg and Comfy locations are discovered locally; discovery alone does
+not mark files verified. Registration needs source metadata access.
+
+**Remove owned model files** previews recorded managed revisions and their logical
+byte sizes before confirmation. Active models and shared components required by
+installed models cannot be removed. External/shared caches and unrelated files
+stay intact. **Discard retained download files** separately reviews temporary
+files and completed files from an unpublished installation. Published models
+are preserved; discarded bytes must be downloaded again if that job is retried.
+
+A Hugging Face token, if required by the source, can be entered for the current
+server session. It is kept in memory and is not written to projects, jobs, logs
+or configuration. Review access terms through the model's source link first.
+
+New installations default to `pretrained_weights/managed/`. Inventory, jobs,
+verification records and the saved storage preference live in
+`.runtime/model_manager/`. Changing the destination affects new jobs; existing
+models and retries retain their recorded locations. File size/integrity checks
+and runtime probes never run model inference. Starting the GUI and queuing
+generation do not download missing checkpoints.
+
+Windows/NVIDIA CUDA is the AI target. ONNX CPU background removal and existing-mesh
+CPU tools remain available on other vendors. AMD ROCm / Intel XPU inference is
+not integrated. Comfy uses a separate environment; original research stacks are
+Linux-first. Native shape CPU fallback must be explicitly configured.
+
+## Optional manual downloads
+
+The commands below are for advanced setup or restoring an external cache. After
+using them, open Models and **Verify files** or register the existing folder.
+They require the main venv, network access and disk space. Normal users should
+use the tracked GUI flow above.
 
 ## TripoSG
 
@@ -98,8 +164,8 @@ Low geometry normals need no weights. High Marigold uses approximately 2.40 GiB:
 .venv/Scripts/python.exe -c "from huggingface_hub import snapshot_download; snapshot_download('prs-eth/marigold-normals-v1-1', allow_patterns=['model_index.json','scheduler/*','tokenizer/*','text_encoder/config.json','text_encoder/model.fp16.safetensors','unet/config.json','unet/diffusion_pytorch_model.fp16.safetensors','vae/config.json','vae/diffusion_pytorch_model.fp16.safetensors'])"
 ```
 
-Medium StableNormal downloads code/weights via torch.hub on first actual use;
-AI normal jobs can fall back to Low;
+Medium StableNormal needs both its weights and pinned upstream source, installed
+through Models before use. AI normal jobs can fall back to Low;
 inspect the actual-baker report.
 
 ## Offline checks
@@ -114,5 +180,5 @@ $env:TRANSFORMERS_OFFLINE='1'
 Unset those environment variables before deliberate model downloads. These checks
 verify startup, not inference without checkpoints. The environment
 check with `--require-paint` should report the RealESRGAN file when it is missing
-until restored. Native backends may download on first use; Comfy never installs
-models implicitly during Generate.
+until restored. Missing native/Comfy model files are reported before GUI inference;
+install and verify them through Models rather than expecting a first-use download.
